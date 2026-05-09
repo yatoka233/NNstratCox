@@ -1,0 +1,30 @@
+Job started on gl3009.arc-ts.umich.edu at Sat May  9 08:31:57 EDT 2026
+Project directory: /nfs/turbo/sph-kevinhe/proj/SurvDistill/NNstratCox
+Conda environment: syn
+Arguments: --n 600 --n-centers 8 --epochs 100 --batch-size 16 --device cpu --seed 123
+Data summary
+  train n=450, test n=150
+  train event rate=0.491, test event rate=0.460
+  centers=8
+
+Training a deep stratified Cox model
+  batch size = 16 event-centered risk sets
+epoch=0001 train_loss=3.2580 val_loss=1.9745
+early stopping at epoch=42; best_epoch=2
+
+Training an ordinary Cox neural net baseline
+
+Held-out performance
+  Stratified model
+    ordinary C-index:   0.715
+    stratified C-index: 0.738
+  Ordinary Cox baseline
+    ordinary C-index:   0.682
+    stratified C-index: 0.684
+
+Use this pattern with your data:
+  X: numeric covariate matrix
+  duration: observed follow-up time
+  event: 1 if event occurred, 0 if censored
+  strata: hospital/center labels used to define within-center risk sets
+Job finished at Sat May  9 08:32:30 EDT 2026
