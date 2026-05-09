@@ -107,8 +107,8 @@ network parameters across all centers; only the Cox risk-set denominators are
 stratified.
 
 The full stratified Cox loss sums this over observed events and divides by the
-number of events. Tied event times are handled with the Breslow approximation in
-`nnstratcox/loss.py`.
+number of events. If several subjects fail at the same time in the same stratum,
+the full-data loss uses the Breslow tied-time form in `nnstratcox/loss.py`.
 
 ## Minimal Usage
 
@@ -173,8 +173,13 @@ batch.
 
 With the default `max_controls=None`, every component uses the full same-stratum
 risk set, so this is still the exact stratified Cox target, optimized in
-component batches. If `max_controls` is set, controls are sampled and the method
-becomes a sampled risk-set / NCC-style approximation.
+component batches. If two subjects fail at the same observed time, they become
+two separate event-centered components. Summing those one-event components gives
+the Breslow tied-time contribution because the same risk-set denominator appears
+once per event at that time.
+
+If `max_controls` is set, controls are sampled and the method becomes a sampled
+risk-set / NCC-style approximation.
 
 ## Loss Implementation
 
@@ -189,9 +194,10 @@ cox_component_loss(log_risk, duration, event)
 strata, computes the Cox negative partial log-likelihood inside each stratum,
 sums the stratum losses, and divides by the total number of events.
 
-`cox_component_loss` is used during training. Each component already contains
-one same-stratum risk set, so it does not need a `strata` argument. It computes
-the Cox loss on that event-centered component.
+`cox_component_loss` is used during training. Each current component is centered
+on one observed event and already contains one same-stratum risk set, so it does
+not need a `strata` argument. In the default event-centered construction, the
+local event count is one.
 
 Inside `_cox_breslow_nll_for_one_stratum`, subjects are sorted by observed time.
 The denominator for each event time is computed by a reverse cumulative
@@ -201,8 +207,9 @@ log-sum-exp:
 log_risk_set_sum[k] = log sum_{m: duration_m >= duration_k} exp(h_m)
 ```
 
-For tied times, events with the same observed time are grouped. The Breslow
-negative log-likelihood contribution for one time group is:
+For the full-data stratified loss, events with the same observed time are
+grouped. The Breslow negative log-likelihood contribution for one tied-time
+group is:
 
 ```text
 -(sum event scores at this time
