@@ -10,5 +10,6 @@ env/
 
 outputs/
 runs/
+logs/
 *.pt
 *.pth
