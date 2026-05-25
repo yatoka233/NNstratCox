@@ -27,7 +27,7 @@ NNstratCox/
     dataset.py     # event-centered same-stratum risk-set batches
     loss.py        # Breslow Cox loss for full strata and components
     train.py       # batched event-centered risk-set training loop
-    metrics.py     # ordinary and stratified C-index
+    metrics.py     # C-index and predictive deviance metrics
     simulate.py    # simulated center-stratified survival data
 ```
 
@@ -172,7 +172,15 @@ the full-data loss uses the Breslow tied-time form in `nnstratcox/loss.py`.
 ## Minimal Usage
 
 ```python
-from nnstratcox import MLPRisk, fit_model, predict_risk, standardize_train_test
+from nnstratcox import (
+    MLPRisk,
+    fit_model,
+    predict_risk,
+    standardize_train_test,
+    concordance_index,
+    predictive_deviance,
+    stratified_predictive_deviance,
+)
 
 x_train, x_test = standardize_train_test(x_train, x_test)
 
@@ -192,6 +200,11 @@ history = fit_model(
 )
 
 risk_score = predict_risk(model, x_test)
+
+c_index = concordance_index(event_test, duration_test, risk_score)
+stratified_c_index = concordance_index(event_test, duration_test, risk_score, center_test)
+dev = predictive_deviance(event_test, duration_test, risk_score)
+stratified_dev = stratified_predictive_deviance(event_test, duration_test, risk_score, center_test)
 ```
 
 ## How Batching Works
@@ -277,6 +290,32 @@ group is:
 
 The returned loss is normalized by the number of observed events, so loss values
 are comparable across batches and validation sets with different event counts.
+
+## Evaluation Metrics
+
+The tutorial reports four held-out metrics:
+
+```text
+ordinary C-index
+stratified C-index
+predictive deviance
+stratified predictive deviance
+```
+
+The two C-index metrics measure discrimination. The ordinary C-index compares
+all comparable test pairs, while the stratified C-index compares only pairs
+within the same stratum and weights strata by their number of comparable pairs.
+
+The two deviance metrics measure held-out Cox partial likelihood. Predictive
+deviance is the ordinary Cox partial-likelihood deviance:
+
+```text
+-2 * log partial likelihood / number of observed events
+```
+
+Stratified predictive deviance uses the same formula, but its risk sets are
+restricted to subjects in the same stratum. For both deviance metrics, smaller
+values indicate better held-out partial likelihood.
 
 ## What This Is Not
 

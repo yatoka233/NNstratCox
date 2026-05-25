@@ -9,9 +9,11 @@ from nnstratcox import (
     MLPRisk,
     concordance_index,
     fit_model,
+    predictive_deviance,
     predict_risk,
     simulate_centered_survival,
     standardize_train_test,
+    stratified_predictive_deviance,
     train_test_split,
 )
 
@@ -90,9 +92,13 @@ def main() -> None:
     print("  Stratified model")
     print(f"    ordinary C-index:   {concordance_index(test.event, test.duration, risk_strat):.3f}")
     print(f"    stratified C-index: {concordance_index(test.event, test.duration, risk_strat, test.center):.3f}")
+    print(f"    predictive deviance:            {predictive_deviance(test.event, test.duration, risk_strat):.3f}")
+    print(f"    stratified predictive deviance: {stratified_predictive_deviance(test.event, test.duration, risk_strat, test.center):.3f}")
     print("  Ordinary Cox baseline")
     print(f"    ordinary C-index:   {concordance_index(test.event, test.duration, risk_ordinary):.3f}")
     print(f"    stratified C-index: {concordance_index(test.event, test.duration, risk_ordinary, test.center):.3f}")
+    print(f"    predictive deviance:            {predictive_deviance(test.event, test.duration, risk_ordinary):.3f}")
+    print(f"    stratified predictive deviance: {stratified_predictive_deviance(test.event, test.duration, risk_ordinary, test.center):.3f}")
 
     print()
     print("Use this pattern with your data:")

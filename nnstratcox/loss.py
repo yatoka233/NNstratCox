@@ -17,8 +17,8 @@ def _cox_breslow_nll_for_one_stratum(
 
     order = torch.argsort(duration)
     t = duration[order]
-    e = event[order].float()
     h = log_risk[order]
+    e = event[order].to(dtype=h.dtype)
 
     if e.sum() == 0:
         zero = h.sum() * 0.0
